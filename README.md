@@ -35,7 +35,7 @@
 
 `AI` `React` `tRPC` `Postgres`
 
-[![Visit](https://img.shields.io/badge/→_vybestudio.ai-2563EB?style=flat-square)](https://vybestudio.ai)
+[![Visit](https://img.shields.io/badge/→_vybestudio.ai-8B5CF6?style=flat-square)](https://vybestudio.ai)
 </td>
 
 <td width="33%" valign="top" align="center">
@@ -61,7 +61,7 @@
 
 `Flutter` `Social` `Calendar`
 
-[![Visit](https://img.shields.io/badge/→_planns.app-10B981?style=flat-square)](https://planns.app)
+[![Visit](https://img.shields.io/badge/→_planns.app-2563EB?style=flat-square)](https://planns.app)
 </td>
 
 </tr>

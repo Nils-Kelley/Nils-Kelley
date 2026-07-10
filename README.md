@@ -19,17 +19,6 @@
 
 <br/>
 
-<!-- ══════════════════  ABOUT  ══════════════════ -->
-### 👋 About me
-
-I'm **Nils** — a founder and full-stack builder shipping software across three fronts: an **AI website builder**, a **rental-management platform**, and a **social planning app**. I like turning a rough idea into a real, live product — end to end, from the database to the pixels.
-
-- 🧠 Currently going deep on **multi-agent AI** for real-world product generation
-- 🛠️ Comfortable across the stack — React/TypeScript on the front, Node/Postgres on the back
-- 📬 Reach me anytime at **contact@sharemarketplace.ca**
-
-<br/>
-
 <!-- ══════════════════  VENTURES  ══════════════════ -->
 ## 🚀 What I'm building
 
@@ -80,6 +69,19 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 <br/>
 
+<!-- ══════════════════  ACTIVITY  ══════════════════ -->
+### 🔥 Activity
+
+<div align="center">
+
+<img height="190" src="https://streak-stats.demolab.com?user=Nils-Kelley&hide_border=true&background=0D1117&stroke=0EA5E9&ring=10B981&fire=10B981&currStreakLabel=0EA5E9&sideLabels=c9d1d9&dates=8b949e&currStreakNum=ffffff&sideNums=ffffff" />
+
+<img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=Nils-Kelley&custom_title=Contribution%20Graph&bg_color=0D1117&color=0EA5E9&line=10B981&point=ffffff&area=true&area_color=0EA5E9&title_color=0EA5E9&hide_border=true" />
+
+</div>
+
+<br/>
+
 <!-- ══════════════════  TECH  ══════════════════ -->
 ### 🧰 Tech I build with
 
@@ -101,19 +103,6 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 <img src="https://img.shields.io/badge/Hono-E36002?style=flat-square&logo=hono&logoColor=white" />
 <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black" />
 <img src="https://img.shields.io/badge/Stripe-635BFF?style=flat-square&logo=stripe&logoColor=white" />
-
-</div>
-
-<br/>
-
-<!-- ══════════════════  ACTIVITY  ══════════════════ -->
-### 🔥 Activity
-
-<div align="center">
-
-<img height="190" src="https://streak-stats.demolab.com?user=Nils-Kelley&hide_border=true&background=0D1117&stroke=0EA5E9&ring=10B981&fire=10B981&currStreakLabel=0EA5E9&sideLabels=c9d1d9&dates=8b949e&currStreakNum=ffffff&sideNums=ffffff" />
-
-<img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=Nils-Kelley&custom_title=Contribution%20Graph&bg_color=0D1117&color=0EA5E9&line=10B981&point=ffffff&area=true&area_color=0EA5E9&title_color=0EA5E9&hide_border=true" />
 
 </div>
 

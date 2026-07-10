@@ -1,19 +1,19 @@
 <!-- ══════════════════  HEADER  ══════════════════ -->
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:7C6AEF,50:A855F7,100:F5487F&height=200&section=header&text=Nils%20Kelley&fontSize=54&fontColor=ffffff&fontAlignY=36&animation=fadeIn&desc=Founder%20%C2%B7%20Full-stack%20builder%20%C2%B7%20Sharing%20is%20Caring&descAlignY=58&descSize=16" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:2563EB,50:0EA5E9,100:10B981&height=200&section=header&text=Nils%20Kelley&fontSize=54&fontColor=ffffff&fontAlignY=36&animation=fadeIn&desc=Founder%20%C2%B7%20Full-stack%20builder%20%C2%B7%20Sharing%20is%20Caring&descAlignY=58&descSize=16" />
 
 <div align="center">
 
 <!-- ══════════════════  TYPING SUBTITLE  ══════════════════ -->
 <a href="https://vybestudio.ai">
-  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=22&duration=3200&pause=800&color=A855F7&center=true&vCenter=true&width=620&lines=I+turn+ideas+into+products+people+actually+use;AI+websites+%C2%B7+rental+software+%C2%B7+social+planning;Founder+of+Share+Marketplace%2C+Vybe+Studio+%26+Planns" alt="typing subtitle" />
+  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=22&duration=3200&pause=800&color=0EA5E9&center=true&vCenter=true&width=620&lines=I+turn+ideas+into+products+people+actually+use;AI+websites+%C2%B7+rental+software+%C2%B7+social+planning;Founder+of+Share+Marketplace%2C+Vybe+Studio+%26+Planns" alt="typing subtitle" />
 </a>
 
 <br/>
 
 <!-- ══════════════════  QUICK LINKS  ══════════════════ -->
-[![Vybe Studio](https://img.shields.io/badge/Vybe_Studio-vybestudio.ai-7C6AEF?style=for-the-badge&logoColor=white)](https://vybestudio.ai)
+[![Vybe Studio](https://img.shields.io/badge/Vybe_Studio-vybestudio.ai-2563EB?style=for-the-badge&logoColor=white)](https://vybestudio.ai)
 [![Share Marketplace](https://img.shields.io/badge/Share_Marketplace-sharemarketplace.ca-00A499?style=for-the-badge&logoColor=white)](https://sharemarketplace.ca)
-[![Planns](https://img.shields.io/badge/Planns-planns.app-F5487F?style=for-the-badge&logoColor=white)](https://planns.app)
+[![Planns](https://img.shields.io/badge/Planns-planns.app-10B981?style=for-the-badge&logoColor=white)](https://planns.app)
 
 </div>
 
@@ -26,7 +26,7 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 - 🧠 Currently going deep on **multi-agent AI** for real-world product generation
 - 🛠️ Comfortable across the stack — React/TypeScript on the front, Node/Postgres on the back
-- 🌍 Building in Canada · reach me at **hello@planns.app**
+- 📬 Reach me anytime at **contact@sharemarketplace.ca**
 
 <br/>
 
@@ -46,7 +46,7 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 `AI` `React` `tRPC` `Postgres`
 
-[![Visit](https://img.shields.io/badge/→_vybestudio.ai-7C6AEF?style=flat-square)](https://vybestudio.ai)
+[![Visit](https://img.shields.io/badge/→_vybestudio.ai-2563EB?style=flat-square)](https://vybestudio.ai)
 </td>
 
 <td width="33%" valign="top" align="center">
@@ -72,7 +72,7 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 `Mobile` `Social` `Calendar`
 
-[![Visit](https://img.shields.io/badge/→_planns.app-F5487F?style=flat-square)](https://planns.app)
+[![Visit](https://img.shields.io/badge/→_planns.app-10B981?style=flat-square)](https://planns.app)
 </td>
 
 </tr>
@@ -96,11 +96,11 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 ### 🤝 Let's connect
 
-[![Email](https://img.shields.io/badge/hello@planns.app-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:hello@planns.app)
+[![Email](https://img.shields.io/badge/contact@sharemarketplace.ca-0D9488?style=for-the-badge&logo=gmail&logoColor=white)](mailto:contact@sharemarketplace.ca)
 [![Vybe Studio](https://img.shields.io/badge/Vybe_Studio-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vybestudio.ai)
 [![Share Marketplace](https://img.shields.io/badge/Share_Marketplace-00A499?style=for-the-badge&logo=airbnb&logoColor=white)](https://sharemarketplace.ca)
 
 </div>
 
 <!-- ══════════════════  FOOTER  ══════════════════ -->
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:F5487F,50:A855F7,100:7C6AEF&height=120&section=footer" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:10B981,50:0EA5E9,100:2563EB&height=120&section=footer" />

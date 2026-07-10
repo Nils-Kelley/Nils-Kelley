@@ -70,7 +70,7 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 <sub>A social planning app that gets real-world plans out of the group chat and onto the calendar. Stop losing plans in text threads, stop flaking — start doing things together. <b>(Seattle beta)</b></sub>
 
-`Mobile` `Social` `Calendar`
+`Flutter` `Social` `Calendar`
 
 [![Visit](https://img.shields.io/badge/→_planns.app-10B981?style=flat-square)](https://planns.app)
 </td>
@@ -85,20 +85,55 @@ I'm **Nils** — a founder and full-stack builder shipping software across three
 
 <div align="center">
 
-<img src="https://skillicons.dev/icons?i=ts,react,nodejs,tailwind,vite,postgres,stripe,vercel,aws,figma,git,py&perline=12" />
+**Languages**<br/>
+<img src="https://skillicons.dev/icons?i=ts,dart,js,html,css&perline=12" /><br/><br/>
+
+**Frontend**<br/>
+<img src="https://skillicons.dev/icons?i=react,flutter,tailwind,redux,materialui,vite,figma&perline=12" /><br/><br/>
+
+**Backend · Data · Infra**<br/>
+<img src="https://skillicons.dev/icons?i=nodejs,postgres,supabase,vercel,git&perline=12" /><br/><br/>
+
+**AI &amp; specialties**<br/>
+<img src="https://img.shields.io/badge/Claude-D97757?style=flat-square&logo=anthropic&logoColor=white" />
+<img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white" />
+<img src="https://img.shields.io/badge/tRPC-2596BE?style=flat-square&logo=trpc&logoColor=white" />
+<img src="https://img.shields.io/badge/Hono-E36002?style=flat-square&logo=hono&logoColor=white" />
+<img src="https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black" />
+<img src="https://img.shields.io/badge/Stripe-635BFF?style=flat-square&logo=stripe&logoColor=white" />
+
+</div>
+
+<br/>
+
+<!-- ══════════════════  ACTIVITY  ══════════════════ -->
+### 🔥 Activity
+
+<div align="center">
+
+<img height="190" src="https://streak-stats.demolab.com?user=Nils-Kelley&hide_border=true&background=0D1117&stroke=0EA5E9&ring=10B981&fire=10B981&currStreakLabel=0EA5E9&sideLabels=c9d1d9&dates=8b949e&currStreakNum=ffffff&sideNums=ffffff" />
+
+<img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=Nils-Kelley&custom_title=Contribution%20Graph&bg_color=0D1117&color=0EA5E9&line=10B981&point=ffffff&area=true&area_color=0EA5E9&title_color=0EA5E9&hide_border=true" />
 
 </div>
 
 <br/>
 
 <!-- ══════════════════  CONNECT  ══════════════════ -->
-<div align="center">
-
 ### 🤝 Let's connect
 
+<div align="center">
+
 [![Email](https://img.shields.io/badge/contact@sharemarketplace.ca-0D9488?style=for-the-badge&logo=gmail&logoColor=white)](mailto:contact@sharemarketplace.ca)
-[![Vybe Studio](https://img.shields.io/badge/Vybe_Studio-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vybestudio.ai)
-[![Share Marketplace](https://img.shields.io/badge/Share_Marketplace-00A499?style=for-the-badge&logo=airbnb&logoColor=white)](https://sharemarketplace.ca)
+[![GitHub](https://img.shields.io/badge/Nils--Kelley-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Nils-Kelley)
+
+<br/><br/>
+
+<a href="https://vybestudio.ai" title="Vybe Studio"><img src="https://www.google.com/s2/favicons?domain=vybestudio.ai&sz=128" width="46" height="46" /></a>
+&nbsp;&nbsp;&nbsp;
+<a href="https://sharemarketplace.ca" title="Share Marketplace"><img src="https://www.google.com/s2/favicons?domain=sharemarketplace.ca&sz=128" width="46" height="46" /></a>
+&nbsp;&nbsp;&nbsp;
+<a href="https://planns.app" title="Planns"><img src="https://www.google.com/s2/favicons?domain=planns.app&sz=128" width="46" height="46" /></a>
 
 </div>
 

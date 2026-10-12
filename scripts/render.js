@@ -1,4 +1,5 @@
-// Renders out/field-dark.svg and out/field-light.svg: one picture, six screens, a thousand dots.
+// The profile picture: one SVG, six screens, a thousand dots. Served live by api/field.js so the clock is
+// set the moment the page loads; `node scripts/render.js` writes a snapshot to out/ for local preview.
 // Scenes: field + name · globe (real coastlines) · contribution calendar · commits by hour · clock · T.
 // Live data when reachable (contribution calendar, push events); seeded stand-ins otherwise.
 // No dependencies. Node 20+.
@@ -137,12 +138,9 @@ function assignByX(targets, key, centerY) {
   pick.forEach((di, q) => { dots[di][key] = tg[q]; });
 }
 
-async function main() {
-  const [contrib, hoursData] = await Promise.all([contributions(), commitsByHour()]);
-  console.log('calendar:', contrib.source, 'total', contrib.total, '| hours:', hoursData.source === 'seeded' ? 'no push events, drawing weekdays from the calendar' : `${hoursData.pushes} pushes`);
-
-  // time
-  const now = new Date(), pt = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
+// Renders both themes for the given instant. Pure apart from the shared dot table; safe to call per request.
+function render(now, contrib, hoursData) {
+  const pt = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
   const h = pt.getHours(), m = pt.getMinutes(), s = pt.getSeconds();
   const hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0');
   const day = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: TZ });
@@ -274,8 +272,22 @@ ${marker(t)}
 </svg>`;
   }
 
-  fs.mkdirSync(OUT, { recursive: true });
-  for (const [k, t] of Object.entries(themes)) { THEME = k; const svg = build(t); fs.writeFileSync(path.join(OUT, `field-${k}.svg`), svg); console.log(`out/field-${k}.svg`, (svg.length / 1024).toFixed(0) + ' KB'); }
-  console.log(`loop ${DUR}s, rendered ${now.toISOString()}`);
+  const out = {};
+  for (const [k, t] of Object.entries(themes)) { THEME = k; out[k] = build(t); }
+  out.loop = DUR;
+  return out;
 }
-main().catch(e => { console.error(e); process.exit(1); });
+
+module.exports = { render, contributions, commitsByHour, LOGIN, TZ };
+
+// CLI: node scripts/render.js  → out/field-dark.svg + out/field-light.svg (a snapshot for local preview)
+if (require.main === module) {
+  (async () => {
+    const [contrib, hoursData] = await Promise.all([contributions(), commitsByHour()]);
+    console.log('calendar:', contrib.source, 'total', contrib.total, '| hours:', hoursData.source === 'seeded' ? 'no push events, drawing weekdays from the calendar' : `${hoursData.pushes} pushes`);
+    const now = new Date(), out = render(now, contrib, hoursData);
+    fs.mkdirSync(OUT, { recursive: true });
+    for (const k of ['dark', 'light']) { fs.writeFileSync(path.join(OUT, `field-${k}.svg`), out[k]); console.log(`out/field-${k}.svg`, (out[k].length / 1024).toFixed(0) + ' KB'); }
+    console.log(`loop ${out.loop}s, rendered ${now.toISOString()}`);
+  })().catch(e => { console.error(e); process.exit(1); });
+}

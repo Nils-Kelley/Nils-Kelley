@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/dark.svg", "destination": "/api/field?theme=dark" },
+    { "source": "/light.svg", "destination": "/api/field?theme=light" },
+    { "source": "/", "destination": "https://github.com/Nils-Kelley" }
+  ],
+  "functions": { "api/field.js": { "includeFiles": "data/**", "memory": 1024, "maxDuration": 10 } }
+}

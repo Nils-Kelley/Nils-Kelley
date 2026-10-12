@@ -139,7 +139,7 @@ function assignByX(targets, key, centerY) {
 
 async function main() {
   const [contrib, hoursData] = await Promise.all([contributions(), commitsByHour()]);
-  console.log('calendar:', contrib.source, 'total', contrib.total, '| hours:', hoursData.source, hoursData.pushes ? `${hoursData.pushes} pushes` : '');
+  console.log('calendar:', contrib.source, 'total', contrib.total, '| hours:', hoursData.source === 'seeded' ? 'no push events, drawing weekdays from the calendar' : `${hoursData.pushes} pushes`);
 
   // time
   const now = new Date(), pt = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
@@ -153,12 +153,22 @@ async function main() {
   const cal = [];
   for (let w = 0; w < weeks; w++) for (let d = 0; d < days; d++) { const lvl = contrib.weeks[w]?.[d] ?? 0; cal.push({ x: f1(cx0 + w * csp), y: f1(cy0 + d * csp), o: LO[lvl], r: LR[lvl] }); }
 
-  // hours targets: columns of dots, tallest column 22 dots
-  const hx0 = 112, hsp = 28, hbase = 236, hstep = 9.4, maxC = Math.max(1, ...hoursData.counts);
+  // hours targets: columns of dots, tallest column 22 dots.
+  // With push events: 24 columns, one per hour of the day. Without them (private repos, no PROFILE_TOKEN):
+  // 7 columns, one per weekday, summed from the real contribution calendar, so nothing on the page is invented.
+  const byWeekday = hoursData.source === 'seeded';
+  const counts = byWeekday ? [0, 1, 2, 3, 4, 5, 6].map(d => contrib.weeks.reduce((a, w) => a + (w[d] || 0), 0)) : hoursData.counts;
+  const hsp = byWeekday ? 56 : 28, hx0 = byWeekday ? 440 - 3 * hsp : 112, hbase = 236, hstep = 9.4, maxC = Math.max(1, ...counts);
   const hours = [];
-  hoursData.counts.forEach((c, hr) => { const n = Math.round(c / maxC * 22); for (let i = 0; i < n; i++) hours.push({ x: f1(hx0 + hr * hsp), y: f1(hbase - i * hstep), o: i === n - 1 ? .95 : .6, r: 2.4 }); });
-  const peakHour = hoursData.counts.indexOf(maxC);
+  counts.forEach((c, col) => { const n = Math.round(c / maxC * 22); for (let i = 0; i < n; i++) hours.push({ x: f1(hx0 + col * hsp), y: f1(hbase - i * hstep), o: i === n - 1 ? .95 : .6, r: 2.4 }); });
+  const peak = counts.indexOf(maxC);
   const hourLabel = hr => hr === 0 ? 'midnight' : hr === 12 ? 'noon' : hr < 12 ? hr + ' am' : (hr - 12) + ' pm';
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const hoursTicks = byWeekday ? dayNames.map((n, i) => [i, n.slice(0, 3)]) : [0, 6, 12, 18].map(hr => [hr, hourLabel(hr)]);
+  const even = Math.min(...counts) / maxC > 0.8;
+  const hoursCaption = byWeekday
+    ? (even ? 'When the work lands. Every day of the week, about the same.' : `When the work lands. Most of it on ${dayNames[peak]}s.`)
+    : `When the commits land. Most of them around ${hourLabel(peak)}.`;
 
   // clock targets
   const KX = 440, KY = 160, KR = 118;
@@ -237,7 +247,7 @@ async function main() {
 
   function build(t) {
     const body = dots.map(dotSVG).join('');
-    const hl = [0, 6, 12, 18].map(hr => `<text class="tick" x="${f1(hx0 + hr * hsp)}" y="${hbase + 22}" text-anchor="middle">${hourLabel(hr)}</text>`).join('');
+    const hl = hoursTicks.map(([col, label]) => `<text class="tick" x="${f1(hx0 + col * hsp)}" y="${hbase + 22}" text-anchor="middle">${label}</text>`).join('');
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${NAME}">
 <style>
   .d{fill:${t.dot}}
@@ -256,7 +266,7 @@ async function main() {
 <g opacity="0">${fade(1)}<text class="cap" x="40" y="316">${CITY_CAPTION}</text></g>
 ${marker(t)}
 <g opacity="0">${fade(2)}<text class="cap" x="${cx0}" y="220">${totalLine}</text></g>
-<g opacity="0">${fade(3)}${hl}<text class="cap" x="${hx0}" y="${hbase + 52}">When the commits land. Most of them around ${hourLabel(peakHour)}.</text></g>
+<g opacity="0">${fade(3)}${hl}<text class="cap" x="${byWeekday ? 40 : hx0}" y="${byWeekday ? 316 : hbase + 52}">${hoursCaption}</text></g>
 <g opacity="0">${fade(4)}<text class="cap" x="40" y="316">${hh}:${mm} in ${CITY}, ${day}. ${h >= 8 ? 'Probably locked in.' : 'Asleep.'}</text>
   <circle cx="${KX}" cy="${KY - 108}" r="2.8" fill="${t.accent}"><animateTransform attributeName="transform" type="rotate" from="${sd} ${KX} ${KY}" to="${sd + 360} ${KX} ${KY}" dur="60s" repeatCount="indefinite"/></circle>
   <circle cx="${KX}" cy="${KY}" r="2.8" fill="${t.accent}"/></g>

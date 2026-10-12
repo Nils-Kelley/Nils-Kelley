@@ -1,0 +1,9 @@
+{
+  "name": "nils-kelley-profile",
+  "private": true,
+  "description": "The animated profile picture: one SVG, a thousand dots, six scenes.",
+  "scripts": {
+    "render": "node scripts/render.js"
+  },
+  "engines": { "node": ">=20" }
+}

@@ -40,41 +40,54 @@ async function getText(url) {
   return r.text();
 }
 
-// 52 weeks x 7 days of levels 0..4 (column-major, Sunday first) + the year's total
+// 52 weeks x 7 days of levels 0..4 (column-major, Sunday first), the year's total, and the current streak.
+// With PROFILE_TOKEN (a personal token of LOGIN) the GraphQL calendar includes private contributions with exact counts.
+// Without it, the public contributions page is scraped (levels only; private contributions appear there only if the
+// profile setting "include private contributions" is on).
+function streakFrom(days) { // days: [{date:'YYYY-MM-DD', on:boolean}] ascending; counts back from today or yesterday
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+  let i = days.length - 1; while (i >= 0 && days[i].date > today) i--;
+  if (i >= 0 && !days[i].on) i--; // today may still be empty; start from yesterday
+  let n = 0; while (i >= 0 && days[i].on) { n++; i--; }
+  return n;
+}
+function weeksFrom(days) { // ascending days → 52 x 7 levels, Sunday first
+  const weeks = []; let cur = null, curKey = null;
+  for (const d of days) {
+    const dt = new Date(d.date + 'T00:00:00Z'); const sunday = new Date(dt); sunday.setUTCDate(dt.getUTCDate() - dt.getUTCDay());
+    const key = sunday.toISOString().slice(0, 10);
+    if (key !== curKey) { cur = [0, 0, 0, 0, 0, 0, 0]; weeks.push(cur); curKey = key; }
+    cur[dt.getUTCDay()] = d.level;
+  }
+  return weeks.slice(-52);
+}
 async function contributions() {
-  const token = process.env.GITHUB_TOKEN;
-  if (token) {
+  const pat = process.env.PROFILE_TOKEN;
+  if (pat) {
     try {
-      const q = `query($login:String!){ user(login:$login){ contributionsCollection{ contributionCalendar{ totalContributions weeks{ contributionDays{ contributionLevel } } } } } }`;
-      const r = await fetch('https://api.github.com/graphql', { method: 'POST', headers: { authorization: `bearer ${token}`, 'content-type': 'application/json', 'user-agent': LOGIN }, body: JSON.stringify({ query: q, variables: { login: LOGIN } }) });
+      const q = `query($login:String!){ user(login:$login){ contributionsCollection{ contributionCalendar{ totalContributions weeks{ contributionDays{ date contributionCount contributionLevel } } } } } }`;
+      const r = await fetch('https://api.github.com/graphql', { method: 'POST', headers: { authorization: `bearer ${pat}`, 'content-type': 'application/json', 'user-agent': LOGIN }, body: JSON.stringify({ query: q, variables: { login: LOGIN } }) });
       const j = await r.json();
+      if (!j.data?.user) throw new Error(JSON.stringify(j.errors || j).slice(0, 200));
       const cal = j.data.user.contributionsCollection.contributionCalendar;
       const L = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
-      const weeks = cal.weeks.slice(-52).map(w => { const d = w.contributionDays.map(x => L[x.contributionLevel] ?? 0); while (d.length < 7) d.push(0); return d; });
-      return { weeks, total: cal.totalContributions, source: 'graphql' };
+      const days = cal.weeks.flatMap(w => w.contributionDays.map(x => ({ date: x.date, level: L[x.contributionLevel] ?? 0, on: x.contributionCount > 0 }))).sort((a, b) => a.date < b.date ? -1 : 1);
+      return { weeks: weeksFrom(days), total: cal.totalContributions, streak: streakFrom(days), source: 'graphql' };
     } catch (e) { console.warn('graphql failed:', e.message); }
   }
   try {
     const html = await getText(`https://github.com/users/${LOGIN}/contributions`);
-    const days = [...html.matchAll(/data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"/g)].map(m => ({ date: m[1], level: +m[2] }));
+    const days = [...html.matchAll(/data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"/g)].map(m => ({ date: m[1], level: +m[2], on: +m[2] > 0 }));
     if (days.length < 300) throw new Error('too few days parsed');
     days.sort((a, b) => a.date < b.date ? -1 : 1);
-    // group by week, Sunday first
-    const weeks = []; let cur = null, curKey = null;
-    for (const d of days) {
-      const dt = new Date(d.date + 'T00:00:00Z'); const sunday = new Date(dt); sunday.setUTCDate(dt.getUTCDate() - dt.getUTCDay());
-      const key = sunday.toISOString().slice(0, 10);
-      if (key !== curKey) { cur = [0, 0, 0, 0, 0, 0, 0]; weeks.push(cur); curKey = key; }
-      cur[dt.getUTCDay()] = d.level;
-    }
     const totalM = html.replace(/,/g, '').match(/([\d]+)\s+contributions?\s+in\s+the\s+last\s+year/i);
-    return { weeks: weeks.slice(-52), total: totalM ? +totalM[1] : null, source: 'html' };
+    return { weeks: weeksFrom(days), total: totalM ? +totalM[1] : null, streak: streakFrom(days), source: 'html' };
   } catch (e) { console.warn('contribution scrape failed:', e.message); }
   // seeded stand-in
   let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
   const weeks = []; let total = 0;
   for (let w = 0; w < 52; w++) { const wk = []; for (let d = 0; d < 7; d++) { const we = d === 0 || d === 6, u = rnd(); const l = we ? (u < .5 ? 0 : u < .8 ? 1 : 2) : (u < .1 ? 0 : u < .35 ? 1 : u < .65 ? 2 : u < .88 ? 3 : 4); total += [0, 2, 5, 9, 14][l]; wk.push(l); } weeks.push(wk); }
-  return { weeks, total, source: 'seeded' };
+  return { weeks, total, streak: 0, source: 'seeded' };
 }
 
 // commits per hour of day (local), from recent public push events
@@ -84,17 +97,19 @@ async function commitsByHour() {
     const pat = process.env.PROFILE_TOKEN;
     const headers = pat ? { authorization: `bearer ${pat}` } : process.env.GITHUB_TOKEN ? { authorization: `bearer ${process.env.GITHUB_TOKEN}` } : {};
     const feed = pat ? `https://api.github.com/users/${LOGIN}/events` : `https://api.github.com/users/${LOGIN}/events/public`;
-    const counts = new Array(24).fill(0); let pushes = 0;
+    const counts = new Array(24).fill(0); let pushes = 0, lastPush = null;
     for (let page = 1; page <= 3; page++) {
       const ev = await getJSON(`${feed}?per_page=100&page=${page}`, headers);
       for (const e of ev) if (e.type === 'PushEvent') {
-        const hour = +new Date(e.created_at).toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: TZ }) % 24;
+        const at = new Date(e.created_at);
+        if (!lastPush || at > lastPush) lastPush = at;
+        const hour = +at.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: TZ }) % 24;
         counts[hour] += Math.max(1, e.payload?.size || 1); pushes++;
       }
       if (ev.length < 100) break;
     }
     if (pushes < 10) throw new Error(`too few pushes to draw (${pushes})`);
-    return { counts, source: 'events', pushes };
+    return { counts, source: 'events', pushes, lastPush: lastPush ? lastPush.toISOString() : null };
   } catch (e) { console.warn('events failed:', e.message); }
   return { counts: [6, 3, 2, 1, 1, 1, 2, 4, 9, 14, 16, 15, 12, 13, 15, 16, 17, 14, 10, 12, 16, 20, 22, 14], source: 'seeded' };
 }
@@ -241,7 +256,11 @@ function render(now, contrib, hoursData) {
     const op = ['0', '0', ...pts.map(p => p.Z > 0.08 ? 1 : 0), '0', '0'].join(';');
     return `<g opacity="0"><animate attributeName="opacity" values="${op}" keyTimes="${kt}" dur="${DUR}s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="translate" values="${tr}" keyTimes="${kt}" dur="${DUR}s" repeatCount="indefinite"/><circle r="3.4" fill="${t.accent}"/><circle r="3" fill="none" stroke="${t.accent}" stroke-width="1.2"><animate attributeName="r" values="3;18" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="2.4s" repeatCount="indefinite"/></circle></g></g>`;
   }
-  const totalLine = contrib.total != null ? `${contrib.total.toLocaleString('en-US')} contributions in the last year.` : 'A year of contributions.';
+  const streakLine = contrib.streak >= 3 ? ` ${contrib.streak} days in a row.` : '';
+  const totalLine = (contrib.total != null ? `${contrib.total.toLocaleString('en-US')} contributions in the last year.` : 'A year of contributions.') + streakLine;
+  const ago = hoursData.lastPush ? Math.max(0, Math.round((now - new Date(hoursData.lastPush)) / 60000)) : null; // minutes
+  const agoText = ago == null ? null : ago < 1 ? 'Last commit just now.' : ago < 60 ? `Last commit ${ago} minute${ago === 1 ? '' : 's'} ago.` : ago < 180 ? `Last commit ${Math.round(ago / 60)} hour${Math.round(ago / 60) === 1 ? '' : 's'} ago.` : null;
+  const statusLine = agoText || (h >= 8 ? 'Probably locked in.' : 'Asleep.');
 
   function build(t) {
     const body = dots.map(dotSVG).join('');
@@ -265,7 +284,7 @@ function render(now, contrib, hoursData) {
 ${marker(t)}
 <g opacity="0">${fade(2)}<text class="cap" x="${cx0}" y="220">${totalLine}</text></g>
 <g opacity="0">${fade(3)}${hl}<text class="cap" x="${byWeekday ? 40 : hx0}" y="${byWeekday ? 316 : hbase + 52}">${hoursCaption}</text></g>
-<g opacity="0">${fade(4)}<text class="cap" x="40" y="316">${hh}:${mm} in ${CITY}, ${day}. ${h >= 8 ? 'Probably locked in.' : 'Asleep.'}</text>
+<g opacity="0">${fade(4)}<text class="cap" x="40" y="316">${hh}:${mm} in ${CITY}, ${day}. ${statusLine}</text>
   <circle cx="${KX}" cy="${KY - 108}" r="2.8" fill="${t.accent}"><animateTransform attributeName="transform" type="rotate" from="${sd} ${KX} ${KY}" to="${sd + 360} ${KX} ${KY}" dur="60s" repeatCount="indefinite"/></circle>
   <circle cx="${KX}" cy="${KY}" r="2.8" fill="${t.accent}"/></g>
 <g opacity="0">${fade(5)}<text class="cap" x="40" y="316">${DOG_CAPTION}</text></g>

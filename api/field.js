@@ -2,16 +2,23 @@
 // Live data is refreshed in memory once an hour; the SVG itself is cached per theme per minute.
 const { render, contributions, commitsByHour } = require('../scripts/render.js');
 
-let data = { at: 0, contrib: null, hours: null, loading: null };
+let data = { calAt: 0, evAt: 0, contrib: null, hours: null };
+let loading = null;
 const svgs = new Map(); // `${theme}:${HH:MM}` → svg
+const CAL_TTL = 60 * 60 * 1000, EV_TTL = 5 * 60 * 1000;
 
 async function freshData() {
-  const age = Date.now() - data.at;
-  if (data.contrib && age < 60 * 60 * 1000) return data;
-  if (!data.loading) data.loading = Promise.all([contributions(), commitsByHour()])
-    .then(([contrib, hours]) => { data = { at: Date.now(), contrib, hours, loading: null }; svgs.clear(); return data; })
-    .catch(e => { data.loading = null; if (!data.contrib) throw e; return data; });
-  return data.contrib ? data : data.loading; // stale-while-revalidate once we have anything
+  const t = Date.now(), calStale = t - data.calAt > CAL_TTL, evStale = t - data.evAt > EV_TTL;
+  if (!calStale && !evStale) return data;
+  if (!loading) loading = (async () => {
+    try {
+      const [contrib, hours] = await Promise.all([calStale ? contributions() : data.contrib, evStale ? commitsByHour() : data.hours]);
+      data = { calAt: calStale ? t : data.calAt, evAt: evStale ? t : data.evAt, contrib, hours };
+      svgs.clear();
+    } finally { loading = null; }
+    return data;
+  })();
+  return data.contrib ? data : loading; // stale-while-revalidate once anything is loaded
 }
 
 module.exports = async (req, res) => {

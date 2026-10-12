@@ -1,5 +1,5 @@
 // The profile picture: one SVG, six screens, a thousand dots. Served live by api/field.js so the clock is
-// set the moment the page loads; `node scripts/render.js` writes a snapshot to out/ for local preview.
+// set the moment the page loads, and SMIL keeps it running (hands, digits, second dot) while the page stays open; `node scripts/render.js` writes a snapshot to out/ for local preview.
 // Scenes: field + name · globe (real coastlines) · contribution calendar · commits by hour · clock · T.
 // Live data when reachable (contribution calendar, push events); seeded stand-ins otherwise.
 // No dependencies. Node 20+.
@@ -157,7 +157,6 @@ function assignByX(targets, key, centerY) {
 function render(now, contrib, hoursData) {
   const pt = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
   const h = pt.getHours(), m = pt.getMinutes(), s = pt.getSeconds();
-  const hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0');
   const day = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: TZ });
 
   // calendar targets
@@ -185,12 +184,11 @@ function render(now, contrib, hoursData) {
 
   // clock targets
   const KX = 440, KY = 160, KR = 118;
-  const hd = ((h % 12) * 30 + m * 0.5) * Math.PI / 180, md = m * 6 * Math.PI / 180, sd = s * 6;
+  // hand angles in degrees at render time; the overlay rotates them from here with SMIL, so they keep time after load
+  const hdDeg = f2((h % 12) * 30 + m * 0.5 + s / 120), mdDeg = f2(m * 6 + s / 10), sd = s * 6;
   const clock = [];
   for (let i = 0; i < 60; i++) { const a = i * 6 * Math.PI / 180, hour = i % 5 === 0; clock.push({ x: f1(KX + Math.sin(a) * KR), y: f1(KY - Math.cos(a) * KR), o: hour ? .95 : .4, r: hour ? 3 : 1.7 }); }
   for (let i = 0; i < 12; i++) { const a = i * 30 * Math.PI / 180; clock.push({ x: f1(KX + Math.sin(a) * (KR - 14)), y: f1(KY - Math.cos(a) * (KR - 14)), o: .55, r: 1.7 }); }
-  for (let q = 0; q < 7; q++) { const rr = 12 + q * 9; clock.push({ x: f1(KX + Math.sin(hd) * rr), y: f1(KY - Math.cos(hd) * rr), o: .95, r: 2.6 }); }
-  for (let q = 0; q < 11; q++) { const rr = 12 + q * 9; clock.push({ x: f1(KX + Math.sin(md) * rr), y: f1(KY - Math.cos(md) * rr), o: .95, r: 2.2 }); }
 
   // assignments
   for (const d of dots) { delete d.cal; delete d.hours; delete d.clock; delete d.dog; }
@@ -262,6 +260,27 @@ function render(now, contrib, hoursData) {
   const agoText = ago == null ? null : ago < 1 ? 'Last commit just now.' : ago < 60 ? `Last commit ${ago} minute${ago === 1 ? '' : 's'} ago.` : ago < 180 ? `Last commit ${Math.round(ago / 60)} hour${Math.round(ago / 60) === 1 ? '' : 's'} ago.` : null;
   const statusLine = agoText || (h >= 8 ? 'Probably locked in.' : 'Asleep.');
 
+  // The clock keeps time after load: each hand is a row of dots in a group that SMIL rotates from the
+  // render-time angle at real speed (hour hand 12 h, minute hand 60 min, second dot 60 s).
+  function hands(t) {
+    const row = (n, r) => Array.from({ length: n }, (_, q) => `<circle class="d" cx="${KX}" cy="${KY - (12 + q * 9)}" r="${r}" opacity=".95"/>`).join('');
+    const spin = (deg, dur) => `<animateTransform attributeName="transform" type="rotate" from="${deg} ${KX} ${KY}" to="${deg + 360} ${KX} ${KY}" dur="${dur}s" repeatCount="indefinite"/>`;
+    return `<g>${spin(hdDeg, 43200)}${row(7, 2.6)}</g><g>${spin(mdDeg, 3600)}${row(11, 2.2)}</g>`
+      + `<circle cx="${KX}" cy="${KY - 108}" r="2.8" fill="${t.accent}">${spin(sd, 60)}</circle><circle cx="${KX}" cy="${KY}" r="2.8" fill="${t.accent}"/>`;
+  }
+  // HH:MM under the face. One <text> per hour and per minute, each shown for its slot of a 24 h / 60 min
+  // cycle that started (begin < 0) at the real time of day, so the digits advance on their own.
+  function digital() {
+    const y = KY + KR + 30, slot = (i, n, dur, elapsed) => {
+      const a = f4(i / n), b = f4((i + 1) / n);
+      const anim = i === 0 ? `values="1;0" keyTimes="0;${b}"` : i === n - 1 ? `values="0;1" keyTimes="0;${a}"` : `values="0;1;0" keyTimes="0;${a};${b}"`;
+      return `<animate attributeName="opacity" calcMode="discrete" ${anim} dur="${dur}s" begin="-${elapsed}s" repeatCount="indefinite"/>`;
+    };
+    const hoursT = Array.from({ length: 24 }, (_, i) => `<text class="time" x="${KX - 3}" y="${y}" text-anchor="end" opacity="0">${String(i).padStart(2, '0')}${slot(i, 24, 86400, h * 3600 + m * 60 + s)}</text>`).join('');
+    const minsT = Array.from({ length: 60 }, (_, i) => `<text class="time" x="${KX + 3}" y="${y}" opacity="0">${String(i).padStart(2, '0')}${slot(i, 60, 3600, m * 60 + s)}</text>`).join('');
+    return `<text class="time" x="${KX}" y="${y}" text-anchor="middle">:</text>${hoursT}${minsT}`;
+  }
+
   function build(t) {
     const body = dots.map(dotSVG).join('');
     const hl = hoursTicks.map(([col, label]) => `<text class="tick" x="${f1(hx0 + col * hsp)}" y="${hbase + 22}" text-anchor="middle">${label}</text>`).join('');
@@ -272,6 +291,7 @@ function render(now, contrib, hoursData) {
   .line{font:400 16px/1 ${SANS};fill:${t.mute}}
   .cap{font:400 15px/1 ${SANS};fill:${t.mute}}
   .tick{font:400 12px/1 ${SANS};fill:${t.mute}}
+  .time{font:500 14px/1 ${SANS};fill:${t.mute};font-variant-numeric:tabular-nums}
 </style>
 <rect width="${W}" height="${H}" fill="${t.bg}"/>
 <defs>
@@ -284,9 +304,8 @@ function render(now, contrib, hoursData) {
 ${marker(t)}
 <g opacity="0">${fade(2)}<text class="cap" x="${cx0}" y="220">${totalLine}</text></g>
 <g opacity="0">${fade(3)}${hl}<text class="cap" x="${byWeekday ? 40 : hx0}" y="${byWeekday ? 316 : hbase + 52}">${hoursCaption}</text></g>
-<g opacity="0">${fade(4)}<text class="cap" x="40" y="316">${hh}:${mm} in ${CITY}, ${day}. ${statusLine}</text>
-  <circle cx="${KX}" cy="${KY - 108}" r="2.8" fill="${t.accent}"><animateTransform attributeName="transform" type="rotate" from="${sd} ${KX} ${KY}" to="${sd + 360} ${KX} ${KY}" dur="60s" repeatCount="indefinite"/></circle>
-  <circle cx="${KX}" cy="${KY}" r="2.8" fill="${t.accent}"/></g>
+<g opacity="0">${fade(4)}<text class="cap" x="40" y="316">${day} in ${CITY}. ${statusLine}</text>
+  ${hands(t)}${digital()}</g>
 <g opacity="0">${fade(5)}<text class="cap" x="40" y="316">${DOG_CAPTION}</text></g>
 </svg>`;
   }
